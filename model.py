@@ -1,5 +1,4 @@
 #when i need it: SQLAlchemy tutorial http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html
-import MySQLdb as mdb
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy import Column, Integer, String, DateTime
@@ -68,50 +67,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-# from http://zetcode.com/db/mysqlpython/
-# #From the connection, we get the cursor object. The cursor is used to traverse the records from the result set. 
-# con = mdb.connect('localhost', 'allysonstronach', '', 'backpageads')
-# #We call the execute() method of the cursor and execute the SQL statement.
-# cur = con.cursor()
-# cur.execute("SELECT * FROM ads limit 1")
-
-# #We fetch the data. Since we retrieve only one record (as written above), we call the fetchone() method.
-# ver = cur.fetchone()
-
-
-# #We print the data that we have retrieved to the console.
-# print "Database version : %s " % ver
-
-# #We check for errors. This is important, since working with databases is error prone.
-# except mdb.Error, e:
-  
-#     print "Error %d: %s" % (e.args[0],e.args[1])
-#     sys.exit(1)
-
-# # In the final step, we release the resources.
-# $ ./version.py
-# Database version : 5.5.9 
-
-
-
-
-
-
-# used this site: http://www.slideshare.net/SarahGuido/a-beginners-guide-to-machine-learning-with-scikitlearn
-
-# from sklearn import cluster
-
-# #create clustering object 
-# k_means = cluster.KMeans(n_clusters=4)
-
-# #fit the clustering model on the data
-# KM = k_means.fit(blah_data)
 
 
 
