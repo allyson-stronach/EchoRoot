@@ -1,10 +1,7 @@
 #when i need it: SQLAlchemy tutorial http://docs.sqlalchemy.org/en/rel_0_9/orm/tutorial.html
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship, backref
 
 Base = declarative_base()
 
@@ -12,7 +9,7 @@ Base = declarative_base()
 
 #found this at: http://docs.sqlalchemy.org/en/rel_0_9/dialects/mysql.html#module-sqlalchemy.dialects.mysql.mysqldb
 #also, this http://docs.sqlalchemy.org/en/rel_0_9/core/engines.html
-engine = create_engine("mysql+mysqldb://user:pass@host/dbname?charset=utf8&use_unicode=0")
+engine = create_engine("mysql+mysqldb://root@localhost:3306/backpageads?charset=utf8&use_unicode=0")
 session = scoped_session(sessionmaker(bind=engine,
                                       autocommit = False,
                                       autoflush = False))
