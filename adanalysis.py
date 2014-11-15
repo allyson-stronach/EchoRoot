@@ -58,6 +58,8 @@ def make_training_set(features, ads):
     print "this is the length of training set", len(training_set)
     return training_set
 
+#this function still not working
+#still need to find the SQL function that will actually make this work
 def make_classifier(training_set):
     print "before classifier line"
     classifier = nltk.NaiveBayesClassifier.train(training_set)
