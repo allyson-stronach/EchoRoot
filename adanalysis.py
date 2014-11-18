@@ -1,82 +1,101 @@
-from model import session, AdAttribute, Ad
-import nltk
+import numpy as np
 
-"""making toy training data set"""
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn import cross_validation
+from sklearn import metrics
+
+from model import session
+
 
 def retrieve_trafficky_text():
-    trafficky_ad_list = []
-    trafficky_ads_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('9292103206', '4142395461', '4146870501') "
-    e = session.execute(trafficky_ads_cmd)
+    documents = []
+    labels = []
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('9292103206', '4142395461', '4146870501') "
+    e = session.execute(ads_text_cmd)
     for text in e:
-        trafficky_ad_list.append((text.text, 'trafficky'))
-    print "running in retrieve trafficky text"
-    return trafficky_ad_list
+        documents.append(text.text)
+        labels.append('trafficky')
+    print 'documents length:', len(documents), 'labels length:', len(labels)
+    dl_list = [documents, labels]
 
-def retrieve_not_trafficky_text():
-    not_trafficky_ad_list = []
-    not_trafficky_ads_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('3104623985', '2139840845 ', '8183362736', '6032946322', '4088991922')"
-    e = session.execute(not_trafficky_ads_cmd)
+    return dl_list
+
+
+def retrieve_not_trafficky_text(dl_list):
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('3104623985', '2139840845 ', '8183362736', '6032946322', '4088991922')"
+    e = session.execute(ads_text_cmd)
     for text in e:
-        not_trafficky_ad_list.append((text.text, 'nottrafficky'))
-    print "running in retrieve not trafficky text"
-    return not_trafficky_ad_list
+        dl_list[0].append(text.text)
+        dl_list[1].append('not trafficky')
+    print 'documents length:', len(dl_list[0]), 'labels length:', len(dl_list[1])
+    print 'fraction trafficky:', len([item for item in dl_list[1] if item == 'trafficky'])/240.0
 
-def make_training_ads(trafficky_ad_list, not_trafficky_ad_list):
-    ads = []
-    for (words, traffickyness) in trafficky_ad_list + not_trafficky_ad_list:
-        words_filtered = [e.lower() for e in words.split() if len(e) >= 3]
-        ads.append((words_filtered, traffickyness))
-        #maybe remove html? other stuffs?
-    print "this is length of ads", len(ads)
-    return ads
+    return dl_list
 
-"""classifier"""
+def instantiate_vectorizer():
+    vectorizer = TfidfVectorizer()
 
-def get_words_in_ads(ads):
-    all_words = []
-    for (words, traffickyness) in ads:
-        all_words.extend(words)
-    print "this is the length of all words", len(all_words), "there was the length of all_words"
-    return all_words
+    return vectorizer
 
-def get_word_features(wordlist):
-    wordlist = nltk.FreqDist(wordlist)
-    word_features = wordlist.keys()
-    print "this is the length of word features", len(word_features)
-    return word_features
+def vectorize_ads(dl_list, vectorizer):
+    X = vectorizer.fit_transform(dl_list[0])
+    y = np.array(dl_list[1])
+    print 'X.shape is:', X.shape, 'y.shape is:', y.shape, 'vectorizer:', vectorizer
+    xy = [X, y]
 
-def extract_features(document, word_features):
-    document_words = set(document)
-    features = {}
-    for word in word_features:
-        features['contains(%s)' % word] = (word in document_words)
-    print "this is the length of extract features", len(features)
-    return features
+    return xy
 
-def make_training_set(features, ads):
-    training_set = nltk.classify.apply_features(features, ads)
-    print "this is the length of training set", len(training_set)
-    return training_set
 
-#this function still not working
-#still need to find the SQL function that will actually make this work
-def make_classifier(training_set):
-    print "before classifier line"
-    classifier = nltk.NaiveBayesClassifier.train(training_set)
-    print "after classifier line"
-    return classifier
+def classify_ads(xy):
+    clf = BernoulliNB()
+    cv = cross_validation.StratifiedKFold(xy[1],5)
+    precision=[]
+    recall=[]
+    for train, test in cv:
+        X_train = xy[0][train]
+        X_test = xy[0][test]
+        y_train = xy[1][train]
+        y_test = xy[1][test]
+        clf.fit(X_train, y_train)
+        y_hat = clf.predict(X_test)
+        p,r,_,_ = metrics.precision_recall_fscore_support(y_test, y_hat)
+        precision.append(p[1])
+        recall.append(r[1])
+    print clf
+    print 'precision:',np.average(precision), '+/-', np.std(precision)
+    print 'recall:', np.average(recall), '+/-', np.std(recall)
+    
+    return clf
+
+
+def test_sample(vectorizer, clf):
+    sample = 'Long hair... Long Legs Tall, Busty , Beautiful, Luscious Lips and Curvy Hips<br> All Service<br> In or Out Call<br> Available Days and Nights<br> call 336 307 5841 |'
+    sample = vectorizer.transform([sample])
+    c = clf.predict(sample)
+    
+    print c
+
+
+def describe_features(vectorizer, clf):
+    probs=clf.feature_log_prob_[1]
+    features=vectorizer.get_feature_names()
+    
+    print 'length of probs:', len(probs), 'length of features:', len(features), 'list of most important features:', sorted(zip(probs,features), reverse=True)[:10]
 
 
 def main():
-    tal = retrieve_trafficky_text()
-    ntal = retrieve_not_trafficky_text()
-    ads = make_training_ads(tal, ntal)
-    all_words = get_words_in_ads(ads)
-    word_features = get_word_features(all_words)
-    features = extract_features(all_words, word_features)
-    training_set = make_training_set(features, ads)
-    classifier = make_classifier(training_set)
+    dl_list = retrieve_trafficky_text()
+    dl_list = retrieve_not_trafficky_text(dl_list)
+    vectorizer = instantiate_vectorizer()
+    xy = vectorize_ads(dl_list, vectorizer)
+    clf = classify_ads(xy)
+    test_sample(vectorizer, clf)
+    describe_features(vectorizer, clf)
 
 if __name__ == "__main__":
     main()
+
+
 
