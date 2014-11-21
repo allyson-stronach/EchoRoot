@@ -13,8 +13,8 @@ def analyze_ad():
     dl_list = retrieve_trafficky_text()
     dl_list = retrieve_not_trafficky_text(dl_list)
     vectorizer = TfidfVectorizer()
-    x_axis_y_axis = vectorize_ads(dl_list, vectorizer)
-    classifier = classify_ads(x_axis_y_axis)
+    xy = vectorize_ads(dl_list, vectorizer)
+    classifier = classify_ads(xy)
     test_sample(vectorizer, classifier)
     describe_features(vectorizer, classifier)
 
@@ -27,20 +27,20 @@ def retrieve_trafficky_text():
     for text in trafficky_text:
         documents.append(text.text)
         labels.append('trafficky')
-    print 'documents length:', len(documents), 'labels length:', len(labels)
+    #print 'documents length:', len(documents), 'labels length:', len(labels)
     dl_list = [documents, labels]
 
     return dl_list
 
 
 def retrieve_not_trafficky_text(dl_list):
-    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('3104623985', '2139840845 ', '8183362736', '6032946322', '4088991922')"
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('3104623985', '2139840845', '8183362736', '6032946322', '4088991922')"
     not_trafficky_text = session.execute(ads_text_cmd)
     for text in not_trafficky_text:
         dl_list[0].append(text.text)
         dl_list[1].append('not trafficky')
-    print 'documents length:', len(dl_list[0]), 'labels length:', len(dl_list[1])
-    print 'fraction trafficky:', len([item for item in dl_list[1] if item == 'trafficky'])/240.0
+    #print 'documents length:', len(dl_list[0]), 'labels length:', len(dl_list[1])
+    #print 'fraction trafficky:', len([item for item in dl_list[1] if item == 'trafficky'])/240.0
 
     return dl_list
 
@@ -48,24 +48,31 @@ def retrieve_not_trafficky_text(dl_list):
 def vectorize_ads(dl_list, vectorizer):
     X = vectorizer.fit_transform(dl_list[0])
     y = np.array(dl_list[1])
-    print 'X.shape is:', X.shape, 'y.shape is:', y.shape, 'vectorizer:', vectorizer
-    x_axis_y_axis = [X, y]
+    #print 'X:', X, 'X.shape is:', X.shape, 'y:', y, 'y.shape is:', y.shape, 'vectorizer:', vectorizer
+    xy = [X, y]
 
-    return x_axis_y_axis
+    return xy
 
 
-def classify_ads(x_axis_y_axis):
+def classify_ads(xy):
     classifier = BernoulliNB()
-    cv = cross_validation.StratifiedKFold(x_axis_y_axis[1],5)
+    #this line has something to do with how the cross validation function splits up the train and test data, I think.
+    cv = cross_validation.StratifiedKFold(xy[1],5)
+    #print "this is cv", cv
     precision=[]
     recall=[]
+    #train is a list of indeces that correspond to the training data (roughtly 75%)
+    #test is a list of indeces that correspond to the test data (25%)
     for train, test in cv:
-        X_train = x_axis_y_axis[0][train]
-        X_test = x_axis_y_axis[0][test]
-        y_train = x_axis_y_axis[1][train]
-        y_test = x_axis_y_axis[1][test]
+        print "this is train:", train, "this is test", test
+        X_train = xy[0][train]
+        X_test = xy[0][test]
+        y_train = xy[1][train]
+        y_test = xy[1][test]
         classifier.fit(X_train, y_train)
+        #look up linear algebra notation
         y_hat = classifier.predict(X_test)
+        #why is this variable titled this?
         p,r,_,_ = metrics.precision_recall_fscore_support(y_test, y_hat)
         precision.append(p[1])
         recall.append(r[1])
@@ -79,9 +86,9 @@ def classify_ads(x_axis_y_axis):
 def test_sample(vectorizer, classifier):
     sample = 'Long hair... Long Legs Tall, Busty , Beautiful, Luscious Lips and Curvy Hips<br> All Service<br> In or Out Call<br> Available Days and Nights<br> call 336 307 5841 |'
     sample = vectorizer.transform([sample])
-    c = classifier.predict(sample)
+    classification_new_ad = classifier.predict(sample)
     
-    print c
+    print classification_new_ad
 
 
 def describe_features(vectorizer, classifier):

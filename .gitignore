@@ -2,3 +2,4 @@ env
 allyson.sql
 .DS_Store
 *.pyc
+*.ipynb
