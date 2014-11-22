@@ -16,18 +16,17 @@ from sklearn.qda import QDA
 
 h = .02  # step size in the mesh
 
-names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Decision Tree",
-         "Random Forest", "AdaBoost", "Naive Bayes", "LDA", "QDA"]
+names = ["Naive Bayes"]
 classifiers = [
-    KNeighborsClassifier(3),
-    SVC(kernel="linear", C=0.025),
-    SVC(gamma=2, C=1),
-    DecisionTreeClassifier(max_depth=5),
-    RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
-    AdaBoostClassifier(),
-    GaussianNB(),
-    LDA(),
-    QDA()]
+    # KNeighborsClassifier(3),
+    # SVC(kernel="linear", C=0.025),
+    # SVC(gamma=2, C=1),
+    # DecisionTreeClassifier(max_depth=5),
+    # RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),
+    # AdaBoostClassifier(),
+    GaussianNB()]
+    # LDA(),
+    # QDA()]
 
 X, y = make_classification(n_features=2, n_redundant=0, n_informative=2,
                            random_state=1, n_clusters_per_class=1)
@@ -102,3 +101,4 @@ for ds in datasets:
 
 figure.subplots_adjust(left=.02, right=.98)
 plt.show()
+
