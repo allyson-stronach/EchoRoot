@@ -1,20 +1,22 @@
 from flask import Flask, render_template, redirect, request, session, flash
 import model
+import jinja2
+import os
 
 app = Flask(__name__) 
 app.secret_key = "7mghJqRp^tU1tE-me^A8TTPF]$Rr$;~gQYmM<8Zq{b7(f`BQ79bC.-/rB07T"
+app.jinja_env.undefined = jinja2.StrictUndefined
 
 @app.route("/")
 def index():
-	ad_number = '1,000,000'
-	att_number = '3,500,000'
-	return render_template('index.html', ad_number=ad_number, att_number=att_number)
-
-@app.route('/analyze', methods = ['POST'])
-def signup():
-    email = request.form['adform']
-    print("The text in the ad you submitted is '" + new_ad + "'")
-    return redirect('/')
+    """This is the 'cover' page of the EchoRoot site"""
+    return render_template('index.html') 
+    
+@app.route("/adanalysis")
+def adanalysis():
+    """This is the big page containing the ad analysis buttons"""
+    return render_template("adanalysis.html")
 
 if __name__== "__main__":
-    app.run(debug = True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, port=port)
