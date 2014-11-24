@@ -26,7 +26,7 @@ def analyze_ad():
 def retrieve_trafficky_text():
     documents = []
     labels = []
-    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('9292103206', '4142395461', '4146870501') "
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509') "
     trafficky_text = session.execute(ads_text_cmd)
     for text in trafficky_text:
         string_text = str(text)
@@ -44,7 +44,7 @@ def retrieve_trafficky_text():
 
 
 def retrieve_not_trafficky_text(dl_list):
-    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('3104623985', '2139840845', '8183362736', '6032946322', '4088991922')"
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN ('7027565783', '4702535139', '9172794962', '6149001084', '7865195399', '4048401717', '3133388625', '5106213824', '3374231635', '2622609175', '6465433780', '4388078188')"
     not_trafficky_text = session.execute(ads_text_cmd)
     for text in not_trafficky_text:
         string_text = str(text)
