@@ -14,65 +14,15 @@ import random
 import pickle
 
 
-def get_id_list():
-    id_list = []
-    ads_id_cmd = "SELECT id FROM ads"
-    ids = session.execute(ads_id_cmd)
-    for i in ids:
-        i = str(i)
-        i = re.sub('(\\()', '', i)
-        i = re.sub('(L,\\))', '', i)
-        id_list.append(i)
-        # f = open('id_list.pickle', 'wb')
-        # pickle.dump(id_list, f)
-        # f.close()
-    random_id = (random.choice(id_list))
-    return random_id
-
-
-def generate_test_data(random_id):
-    # f = open('id_list.pickle')
-    # id_list = pickle.load(f)
-    # f.close()
-    # random_id = (random.choice(id_list))
-    test_document = []
-    #ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", random_id
-    #ads_text_cmd = "SELECT text AS text FROM ads WHERE id = random_id"
-
-    q = session.query(Ad.text).filter(Ad.id == random_id)
-    #session.query(ads).filter(text.id == random_id)
-    test_text = session.execute(q)
-
-    #print session.query(q.exists())
-
-    #test_text = session.execute(ads_text_cmd)
-    #print test_text
-    for text in test_text:
-        print str(text)
-    # if test_text == ['empty string']:
-    #     new_random = get_random()
-    #     ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", new_random
-    #     test_text = session.execute(ads_text_cmd)
-    # else:    
-    #for text in test_text:
-        string_text = str(text)
-        lower_text = string_text.lower()
-        no_HTML_text = re.sub('<\s*\w.*?>', '', lower_text)
-        no_unicode_text = re.sub('([\\\\]x..)', '', no_HTML_text)
-        no_newline_text = re.sub('([\\\\]n)', '', no_unicode_text)
-        filtered_text = no_newline_text
-        test_document.append(filtered_text)
-    print 'test document length:', len(test_document), test_document
-    return test_document
-
-
 def analyze_ad():
     dl_list = retrieve_trafficky_text()
     dl_list = retrieve_not_trafficky_text(dl_list)
     vectorizer = TfidfVectorizer(stop_words='english')
     Xy = vectorize_ads(dl_list, vectorizer)
     classifier = classify_ads(Xy)
-    test_sample(vectorizer, classifier)
+    random_id = get_random_id()
+    test_document = generate_test_data(random_id)
+    test_sample(vectorizer, classifier, test_document)
     describe_features(vectorizer, classifier)
 
 
@@ -152,9 +102,44 @@ def classify_ads(Xy):
     return classifier
 
 
-def test_sample(vectorizer, classifier):
-    sample = 'Long hair... Long Legs Tall, Busty , Beautiful, Luscious Lips and Curvy Hips<br> All Service<br> In or Out Call<br> Available Days and Nights<br> call 336 307 5841 |'
-    sample = vectorizer.transform([sample])
+def get_random_id():
+    id_list = []
+    ads_id_cmd = "SELECT id FROM ads"
+    ids = session.execute(ads_id_cmd)
+    for i in ids:
+        i = str(i)
+        i = re.sub('(\\()', '', i)
+        i = re.sub('(L,\\))', '', i)
+        id_list.append(i)
+    random_id = (random.choice(id_list))
+    return random_id
+
+
+def generate_test_data(random_id):
+    test_document = []
+    query = session.query(Ad.text).filter(Ad.id == random_id)
+    test_text = session.execute(query)
+    #use this eventually?
+    #would it be faster to pick a random number in python and then check if that id# exists?
+    #print session.query(q.exists())
+    for text in test_text:
+        string_text = str(text)
+        string_text = re.sub('(\\()', '', string_text)
+        string_text = re.sub('(,\\))', '', string_text)
+        lower_text = string_text.lower()
+        no_HTML_text = re.sub('<\s*\w.*?>', '', lower_text)
+        no_unicode_text = re.sub('([\\\\]x..)', '', no_HTML_text)
+        no_newline_text = re.sub('([\\\\]n)', '', no_unicode_text)
+        filtered_text = no_newline_text
+        test_document.append(filtered_text)
+    #print 'test document length:', len(test_document), test_document
+    print test_document
+    return test_document
+
+
+def test_sample(vectorizer, classifier, test_document):
+    #sample = 'Long hair... Long Legs Tall, Busty , Beautiful, Luscious Lips and Curvy Hips<br> All Service<br> In or Out Call<br> Available Days and Nights<br> call 336 307 5841 |'
+    sample = vectorizer.transform(test_document)
     classification_new_ad = classifier.predict(sample)
     
     print classification_new_ad
@@ -166,13 +151,12 @@ def describe_features(vectorizer, classifier):
 
     features=vectorizer.get_feature_names()
     
-    print 'this is a list of the stop words:', a, 'length of probs:', len(probs), 'length of features:', len(features), 'list of most important features:', sorted(zip(probs,features), reverse=True)[:10]
+    #print 'this is a list of the stop words:', a, 
+    print 'length of probs:', len(probs), 'length of features:', len(features), 'list of most important features:', sorted(zip(probs,features), reverse=True)[:10]
 
 
 def main():
-    #analyze_ad()
-    random_id = get_id_list()
-    generate_test_data(random_id)
+    analyze_ad()
 
 if __name__ == "__main__":
     main()
@@ -183,7 +167,26 @@ if __name__ == "__main__":
 
 
 
-    #>= (SELECT FLOOR( MAX(id) * RAND()) FROM ads ) ORDER BY id LIMIT 1"
+#>= (SELECT FLOOR( MAX(id) * RAND()) FROM ads ) ORDER BY id LIMIT 1"
 
-    #SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE id = random_id AND ads_attributes.value NOT IN ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509', '7027565783', '4702535139', '9172794962', '6149001084', '7865195399', '4048401717', '3133388625', '5106213824', '3374231635', '2622609175', '6465433780', '4388078188')"
+#SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE id = random_id AND ads_attributes.value NOT IN ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509', '7027565783', '4702535139', '9172794962', '6149001084', '7865195399', '4048401717', '3133388625', '5106213824', '3374231635', '2622609175', '6465433780', '4388078188')"
+
+
+# f = open('id_list.pickle', 'wb')
+# pickle.dump(id_list, f)
+# f.close()
+
+# f = open('id_list.pickle')
+# id_list = pickle.load(f)
+# f.close()
+
+#ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", random_id
+#ads_text_cmd = "SELECT text AS text FROM ads WHERE id = random_id"
+
+# if test_text == ['empty string']:
+#     new_random = get_random()
+#     ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", new_random
+#     test_text = session.execute(ads_text_cmd)
+# else:    
+#for text in test_text:
 
