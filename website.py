@@ -1,7 +1,8 @@
 from flask import Flask, render_template, redirect, request, session, flash
-import model
+from classifier import generate_test_data
 import jinja2
 import os
+import random
 
 app = Flask(__name__) 
 app.secret_key = "7mghJqRp^tU1tE-me^A8TTPF]$Rr$;~gQYmM<8Zq{b7(f`BQ79bC.-/rB07T"
@@ -15,7 +16,10 @@ def index():
 @app.route("/adanalysis")
 def adanalysis():
     """This is the big page containing the ad analysis buttons"""
-    return render_template("adanalysis.html")
+    #test_documents = does_stuff()
+    test_documents = ['a', 'b', 'c', 'd']
+    rc = (random.choice(test_documents))
+    return render_template('adanalysis.html')
 
 if __name__== "__main__":
     port = int(os.environ.get("PORT", 5000))
