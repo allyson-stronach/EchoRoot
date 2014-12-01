@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    
+  <head>   
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,39 +8,48 @@
     <!-- if I remove this next line, the font changes and the button and sizing is less stylized -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
 
-    <!-- When I remove this, the grey boxes go away <link rel="stylesheet" href="/static/css/style.css"> -->
-
+    <link rel="stylesheet" href="/static/css/style.css">
     
     <title>EchoRoot</title>
-
   </head>
 
 
   <body>
-    <div class="site-wrapper">
-      <div class="site-wrapper-inner">
-        <div class="cover-container">
-          <div class="inner cover">
+      <section id="with-container-fluid">
+            <div>
+              <h1><img src="/static/img/end_human_trafficking.jpg"><h1>
+            </div>
+              <h1>EchoRoot</h1>
+              <p class="lead"> 
+              Can machine learning techniques uncover signs of sex trafficking in online sex ads?
+              </p>
             <div class="container-fluid">
-              <div class="row">
-                <img src="/static/img/sex-trafficking-image-1.jpg">
-                <h1 class="cover-heading">EchoRoot</h1>
-              </div>
+                <div class="row">                    
+                    <h4>
+                    <div class="col-xs-4">
+                        <h4> -BLAH- </h4>
+                        <p>15,000-75,000 men, women, and children are trafficked into the U.S. each year.</p>
+                        <p>Of suspected human trafficking in the U.S., 82% is for sex.</p> 
+                    </div>
+                    <div class="col-xs-4">
+                        <h4> -BLAH- </h4>
+                        <p>According to the Thorn Survivor Survey, 3 out of 4 underage sex trafficking victims are advertised online.</p>
+                        <p>The internet has simplified illegal transactions for johns, and continues to create new opportunities for pimps.</p>
+                        <p>Backpage.com is one of the most ubiquitous sex ad websites in the world.</p>
+                    </div>
+                    <div class="col-xs-4">
+                        <h4> -BLAH- </h4>
+                        <p>EchoRoot applies a foundational machine learning concept, the Bayesian classifier, to the text of backpage.com ads in search for salient features that indicate human trafficking.</p>
+                    </div>
+                    </h4>
+                </div>
             </div>
-            <p class="lead">Explanation here.
-            <p class="lead">
-              <a href="/adanalysis" class="btn btn-lg btn-default">Analyze Ads</a>
-            </p>
-                    <div class="mastfoot">
-                    <div class="inner">
-                      <p>Data Science for Good.</p>
-                </div>              
-              </div>  
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        </section>
+
+    <section id="with-container-fluid">  
+      <h5><a href="/adanalysis" class="btn btn-lg btn-default">Ad Analysis</a></h5>
+      <h5>Data Science for Good.</h5> 
+    </section>
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
