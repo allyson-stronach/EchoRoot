@@ -12,7 +12,7 @@ def index():
     """This is the 'cover' page of the EchoRoot site"""
     return render_template('index.html') 
     
-@app.route("/adanalysis")
+@app.route("/adanalysis", methods=['GET'])
 def adanalysis():
     """This is the big page containing the ad analysis buttons"""
     random_id = get_random_id

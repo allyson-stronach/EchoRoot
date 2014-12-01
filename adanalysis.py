@@ -21,8 +21,9 @@ def analyze_ad():
     Xy = vectorize_ads(dl_list, vectorizer)
     classifier = classify_ads(Xy)
     random_id = get_random_id()
+    pickle_classifier(classifier)
     test_document = generate_test_data(random_id)
-    test_sample(vectorizer, classifier, test_document)
+    test_sample(vectorizer, test_document)
     describe_features(vectorizer, classifier)
 
 
@@ -126,6 +127,7 @@ def generate_test_data(random_id):
         string_text = str(text)
         string_text = re.sub('(\\()', '', string_text)
         string_text = re.sub('(,\\))', '', string_text)
+        string_text = re.sub("(\\')", "", string_text)
         lower_text = string_text.lower()
         no_HTML_text = re.sub('<\s*\w.*?>', '', lower_text)
         no_unicode_text = re.sub('([\\\\]x..)', '', no_HTML_text)
@@ -136,13 +138,24 @@ def generate_test_data(random_id):
     print test_document
     return test_document
 
+def pickle_classifier(classifier):
+    f = open('classifier.pickle', 'wb')
+    pickle.dump(classifier, f)
+    f.close()
 
-def test_sample(vectorizer, classifier, test_document):
-    #sample = 'Long hair... Long Legs Tall, Busty , Beautiful, Luscious Lips and Curvy Hips<br> All Service<br> In or Out Call<br> Available Days and Nights<br> call 336 307 5841 |'
+
+def test_sample(vectorizer, test_document):
+    f = open('classifier.pickle')
+    classifier = pickle.load(f)
     sample = vectorizer.transform(test_document)
     classification_new_ad = classifier.predict(sample)
+    log_proba_classification = classifier.predict_log_proba(sample)
+    proba_classification = classifier.predict_proba(sample)
+    f.close()
     
-    print classification_new_ad
+    print "binary classification:", classification_new_ad
+    #print "log probability classification:", log_proba_classification
+    print "probability classification:", proba_classification
 
 
 def describe_features(vectorizer, classifier):
@@ -167,26 +180,9 @@ if __name__ == "__main__":
 
 
 
-#>= (SELECT FLOOR( MAX(id) * RAND()) FROM ads ) ORDER BY id LIMIT 1"
+#x >= (SELECT FLOOR( MAX(id) * RAND()) FROM ads ) ORDER BY id LIMIT 1"
 
 #SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE id = random_id AND ads_attributes.value NOT IN ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509', '7027565783', '4702535139', '9172794962', '6149001084', '7865195399', '4048401717', '3133388625', '5106213824', '3374231635', '2622609175', '6465433780', '4388078188')"
 
 
-# f = open('id_list.pickle', 'wb')
-# pickle.dump(id_list, f)
-# f.close()
-
-# f = open('id_list.pickle')
-# id_list = pickle.load(f)
-# f.close()
-
-#ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", random_id
-#ads_text_cmd = "SELECT text AS text FROM ads WHERE id = random_id"
-
-# if test_text == ['empty string']:
-#     new_random = get_random()
-#     ads_text_cmd = "SELECT text AS text FROM ads WHERE id = (%d)", new_random
-#     test_text = session.execute(ads_text_cmd)
-# else:    
-#for text in test_text:
 
