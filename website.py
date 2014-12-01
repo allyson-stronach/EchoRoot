@@ -17,8 +17,7 @@ def adanalysis():
     """This is the big page containing the ad analysis buttons"""
     random_id = get_random_id
     blah = generate_test_data(random_id)
-    print blah
-    return render_template('adanalysis.html', blah=blah)
+    return render_template('adanalysis.html')
 
 if __name__== "__main__":
     port = int(os.environ.get("PORT", 5000))

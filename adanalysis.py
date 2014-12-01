@@ -24,13 +24,15 @@ def analyze_ad():
     pickle_classifier(classifier)
     test_document = generate_test_data(random_id)
     test_sample(vectorizer, test_document)
+    known_trafficky_test_document = get_known_trafficking_sample()
+    test_trafficky_sample(vectorizer, known_trafficky_test_document)
     describe_features(vectorizer, classifier)
 
 
 def retrieve_trafficky_text():
     documents = []
     labels = []
-    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509') "
+    ads_text_cmd = "SELECT ads.text AS text FROM ads_attributes JOIN ads ON ads.id = ads_id WHERE ads_attributes.value IN  ('7087629612', '9292103206', '4142395461', '4146870501', '7045060509')"
     trafficky_text = session.execute(ads_text_cmd)
     for text in trafficky_text:
         string_text = str(text)
@@ -76,13 +78,12 @@ def vectorize_ads(dl_list, vectorizer):
 
 def classify_ads(Xy):
     classifier = BernoulliNB()
-    #this line has something to do with how the cross validation function splits up the train and test data, I think.
+    #this line has something to do with how the cross validation function splits up the train and test data
     cv = cross_validation.StratifiedKFold(Xy[1],2)
-    #print "this is cv", cv
     precision=[]
     recall=[]
-    #train is a list of indeces that correspond to the training data (roughtly 75%)
-    #test is a list of indeces that correspond to the test data (25%)
+    #train is a list of indeces that correspond to the % of training data
+    #test is a list of indeces that correspond to the % oftest data
     for train, test in cv:
         #print "this is train:", train, "this is test", test
         X_train = Xy[0][train]
@@ -90,7 +91,7 @@ def classify_ads(Xy):
         y_train = Xy[1][train]
         y_test = Xy[1][test]
         classifier.fit(X_train, y_train)
-        #look up linear algebra notation
+        #y_hat used because convention; it is used in linear algebra notation
         y_hat = classifier.predict(X_test)
         #why is this variable titled this?
         p,r,_,_ = metrics.precision_recall_fscore_support(y_test, y_hat)
@@ -138,6 +139,26 @@ def generate_test_data(random_id):
     print test_document
     return test_document
 
+def get_known_trafficking_sample():
+    known_trafficky_test_document = []
+    query = "SELECT text from ads WHERE text LIKE '%cherry11%' LIMIT 1"
+    known_trafficky_test_text = session.execute(query)
+    for text in known_trafficky_test_text:
+        string_text = str(text)
+        string_text = re.sub('(\\()', '', string_text)
+        string_text = re.sub('(,\\))', '', string_text)
+        string_text = re.sub("(\\')", "", string_text)
+        lower_text = string_text.lower()
+        no_HTML_text = re.sub('<\s*\w.*?>', '', lower_text)
+        no_unicode_text = re.sub('([\\\\]x..)', '', no_HTML_text)
+        no_newline_text = re.sub('([\\\\]n)', '', no_unicode_text)
+        filtered_text = no_newline_text
+        known_trafficky_test_document.append(filtered_text)
+    #print 'test document length:', len(test_document), test_document
+    print known_trafficky_test_document
+    return known_trafficky_test_document
+
+
 def pickle_classifier(classifier):
     f = open('classifier.pickle', 'wb')
     pickle.dump(classifier, f)
@@ -154,6 +175,20 @@ def test_sample(vectorizer, test_document):
     f.close()
     
     print "binary classification:", classification_new_ad
+    #print "log probability classification:", log_proba_classification
+    print "probability classification:", proba_classification
+
+
+def test_trafficky_sample(vectorizer, known_trafficky_test_document):
+    f = open('classifier.pickle')
+    classifier = pickle.load(f)
+    sample = vectorizer.transform(known_trafficky_test_document)
+    classification_trafficky_ad = classifier.predict(sample)
+    log_proba_classification = classifier.predict_log_proba(sample)
+    proba_classification = classifier.predict_proba(sample)
+    f.close()
+    
+    print "binary classification:", classification_trafficky_ad
     #print "log probability classification:", log_proba_classification
     print "probability classification:", proba_classification
 
