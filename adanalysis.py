@@ -24,7 +24,7 @@ def analyze_ad():
     pickle_classifier(classifier)
     test_document = generate_test_data(random_id)
     test_sample(vectorizer, test_document)
-    test_all_samples(vectorizer)
+    #test_all_samples(vectorizer)
     describe_features(vectorizer, classifier)
 
 
@@ -188,7 +188,7 @@ def test_all_samples(vectorizer):
     test_samples_list = []
     probability_classification_list = []
     histogram_data = {0.0:0, 0.1:0, 0.2:0, 0.3:0, 0.4:0, 0.5:0, 0.6:0, 0.7:0, 0.8:0, 0.9:0, 1.0:0}
-    ads_text_cmd = "SELECT text FROM ads LIMIT 10000"
+    ads_text_cmd = "SELECT text FROM ads LIMIT 1000000"
     test_samples = session.execute(ads_text_cmd)
     print test_samples
 

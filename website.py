@@ -13,15 +13,20 @@ def index():
     """This is the 'cover' page of the EchoRoot site"""
     return render_template('index.html') 
     
-# @app.route("/adanalysis", methods=['GET'])
-# def adanalysis():
-#     """This is the big page containing the ad analysis buttons"""
-#     return render_template('adanalysis.html')
-
-@app.route("/naivevis", methods=['GET'])
+@app.route("/adanalysis", methods=['GET'])
 def adanalysis():
-    """This is the big page containing the histogram"""
-    return render_template('naivevis.html')
+    """This is the big page containing the ad analysis buttons"""
+    return render_template('adanalysis.html')
+
+def showAd():
+	x = blah
+	return x
+
+
+# @app.route("/naivevis", methods=['GET'])
+# def adanalysis():
+#     """This is the big page containing the histogram"""
+#     return render_template('naivevis.html')
 
 if __name__== "__main__":
     port = int(os.environ.get("PORT", 5000))
