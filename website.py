@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, request, session, flash
 from adanalysis import generate_test_data, get_random_id
+
 import jinja2
 import os
 
@@ -12,12 +13,15 @@ def index():
     """This is the 'cover' page of the EchoRoot site"""
     return render_template('index.html') 
     
-@app.route("/adanalysis", methods=['GET'])
+# @app.route("/adanalysis", methods=['GET'])
+# def adanalysis():
+#     """This is the big page containing the ad analysis buttons"""
+#     return render_template('adanalysis.html')
+
+@app.route("/naivevis", methods=['GET'])
 def adanalysis():
-    """This is the big page containing the ad analysis buttons"""
-    random_id = get_random_id
-    blah = generate_test_data(random_id)
-    return render_template('adanalysis.html')
+    """This is the big page containing the histogram"""
+    return render_template('naivevis.html')
 
 if __name__== "__main__":
     port = int(os.environ.get("PORT", 5000))

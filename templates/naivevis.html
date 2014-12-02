@@ -1,141 +1,97 @@
-<html>
-<head>
-  <title>Web Worker Map Reduce</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
- 
-<script type="text/js-worker">
-String.prototype.startsWith = function (str){
-  return this.indexOf(str) == 0;
-};
- 
-var res = '';
-var collect_map = { keys : [], values : {} };
-function collect(key, value) {
-  var lst = collect_map.values[key];
-  if (!lst) {
-    lst = [];
-    collect_map.values[key] = lst;
-    collect_map.keys[collect_map.keys.length] = key;
-  }
-  lst[lst.length] = value;
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+
+.bar {
+  fill: steelblue;
 }
- 
-function map(key, instance) {
-  instance.attributes.forEach(
-    function(attribute, idx, arr)
-    {
-      if (typeof (instance.attributes[idx]) === "number")
-      {
-         collect(instance.class + "_" + instance.columns[idx], attribute);
-      }
-    }
-  );
-	collect("target_" + instance.class, 1);
+
+.bar:hover {
+  fill: brown;
 }
- 
-function reduce(key, values) {
-  if (key.startsWith("target_")) { 
-		sum = 0;
-    values.forEach(
-      function(v, idx, arr)
-      {
-        sum += v;
-      }
-    );
- 
-    collect(key,sum)
-  } else {
-		sum = 0;
-		sumSq = 0;
-		count = 0;
-    values.forEach(
-      function(v, idx, arr) { 
-			  sum += v;
-			  sumSq += v*v;
-        count++;
-      }
-    );
-		mean = sum/count;
-		collect(key + "_mean", mean);
-    collect(key + "_stddev", Math.sqrt(Math.abs(sumSq - mean * sum) / count));
-  }
+
+.axis {
+  font: 10px sans-serif;
 }
- 
-var cols = ['track_id','title','song_id','release','artist_id','artist_mbid','artist_name','duration','artist_familiarity','artist_hotttnesss','year','track_7digitalid','shs_perf','shs_work', 'genre'];
- 
-var data = [
-["TRMMMBB12903CB7D21","2 Da Beat Ch'yall","SOEYRFT12AB018936C","Da Bomb","AR3Z9WY1187FB4CDC2","bf61e8ff-7621-4655-8ebd-68210645c5e9","Kris Kross",221.20444,0.588156187675,0.401092425177,1993,6435649,-1,0,"rock"],
-["TRMMMKI128F931D80D",006,"SOSDCFG12AB0184647","Lena 20 År","ARSB5591187B99A848","fba3e876-68f1-4a1f-99d9-c604480202ba","Lena Philipsson",262.26893,0.529819134567,0.410228511159,1998,6010886,-1,0,"rock"],
-["TRMMHMD128F427428D","02.17 AM","SOPWMAB12A58A7E8E9","Sweep Of Days","AR7B8PW1187FB3E82C","455aca99-38f3-47cb-aa6b-820cf9de3c91","Blue Foundation",181.39383,0.699262067756,0.517721371004,2004,1658762,-1,0,"rock"],
-["TRMMBOJ128F429DAF3","10_000 Chariots","SOKSQVY12A8C142295","Mr. Marley","ARHMCWM1187FB37D67","cbfb9bcd-c5a0-4d7c-865f-2c641c171e1c","Damian Jr. Gong Marley",266.08281,0.713114587617,0.537442074217,1996,1862551,-1,0,"rock"],
-["TRMMFVV128F426A658","747 (Strangers In The Night) (Live At The Hammersmith Odeon) (1997 Digital Remaster)","SOJWHPR12A8C136091","Wheels Of Steel/Strong Arm Of The Law","AR6ITTI1187FB5BC63","bbd80354-597e-4d53-94e4-92b3a7cb8f2c","Saxon",295.81016,0.691487697851,0.519048155357,0,1618910,-1,0,"rock"],
-["TRMMFYF128F421EFDE",308,"SOTWGEZ12A81356D40","Mainlanders","ARALXR41187B9AF677","eeca2be5-44f5-4799-92b2-0ae8185f14b6","Ricaine",242.78159,0.424827802101,0.287016540604,1996,2515841,-1,0,"rock"],
-["TRMMFEH128F424B406",1970,"SOFQMXH12A8C135CC9","The Exies","AR1GNFR1187B9AD1FD","97e3f316-ec68-47f2-b870-bb4bd0a61f08","The Exies",255.50322,0.796797414079,0.453259925069,2000,2126216,-1,0,"jazz"],
-["TRMMNOW128F42557E3","14 Valses/Waltzes (2005 Digital Remaster): No.6 in D flat Op.64 No.1","SOQEVFJ12A8C136B71","Icon: Dinu Lipatti","AR9OY821187FB4AF8A","dff7bf31-661a-4c7e-962b-4b75eea6fdeb","Dinu Lipatti",105.87383,0.510538636602,0.415634852949,0,2759533,-1,0,"jazz"],
-["TRMMPJI128F1460051","4% Pantomime (2000 Digital Remaster)","SODJCZC12A6D4F8DCA","Cahoots","ARGF9VF1187FB37DAE","8c90ad8c-9150-4c51-a1eb-342232e99d06","The Band",272.32608,0.654917550186,0.499462810569,1971,272917,-1,0,"jazz"],
-["TRMMJKZ128F930998E","7th Message","SOZLCVC12A6D4FA32E","Vocal Studies and Uprock Narratives","ARY4M5Z1187FB45D98","fc61dd75-880b-44ba-9ba9-c7b643d33413","Prefuse 73",234.13506,0.734118716647,0.445401164255,2000,5927964,-1,0,"jazz"],
-["TRMMJVQ128F42394BD","1975 (demo acústica)","SOPKFJB12A8AE48407","Mundo EP","ARUGNUU1187B9B9E60","c02be917-962e-4caf-939c-0c06db792cab","Clovis",227.5522,0.552597421266,0.331055888598,0,2015878,-1,0,"rock"],
-["TRMMVYI128F92E2DA4","2 Miles","SOWXNVD12A8C1405E6","LIVE AT MONTREUX 2002","ARPS6BR1187FB5B63B","274718a2-5214-4673-bb46-ce1eef1335bd","Candy Dulfer",493.11302,0.601932031603,0.389152446671,1995,5768284,-1,0,"rock"],
-["TRMMKCC128F14988FE","10 Wayz","SOEOBTH12A6D4F9319","I Got That Work","AR0Y9WH1187B9ACB04","6c5ab1b7-8c64-4edb-b6fb-aea57df96a9d","Big Tggymers",265.482,0.676252286617,0.412465341519,2000,574653,-1,0,"rock"],
-["TRMMKPO128F92CCE72","64 Days","SOKPBCE12A8C144408","The Lights Are Getting Dim","ARNMAP31187B9976E5","5f79f03a-af60-4d32-b96a-9c4fcc442378","The Neckbones",124.44689,0.401838919314,0.0,0,4155590,-1,0,"jazz"]
-];
- 
-function start()
-{
-  data.forEach(
-    function(row, idx, arr) {
-      instance = { class : row[row.length - 1], 
-                   columns: cols, attributes: row };
-      map(row[idx], instance);
-    }
-  );
- 
-  collect_map.keys.forEach(
-    function(attribute, idx, arr)
-    {
-       reduce(attribute, collect_map.values[attribute]);
-    }
-  );
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }
- 
-self.onmessage = function (oEvent) {
-  start();
- 
-  var res = JSON.stringify(collect_map.values, null, '&nbsp;')
-  res = res.replace(new RegExp('\n', 'g'),'<br />');
-  self.postMessage(res);
-};
- 
-</script>
- 
-<script type="text/javascript">
-function startWorker()
-{
-  var parts = [];
-  Array.prototype.forEach.call(
-    document.querySelectorAll("script[type=\"text\/js-worker\"]"),
-    function (oScript) {
-      parts[parts.length] = oScript.textContent;
-    }
-  );
- 
-  var blob = new Blob(parts);
-  var worker = new Worker(window.URL.createObjectURL(blob));
-  worker.onmessage = function (oEvent) {
-    document.getElementById('results').innerHTML = 'finished' ; // oEvent.data;
-  };
- 
-  worker.postMessage("");
+
+.x.axis path {
+  display: none;
 }
-</script>
- 
-</head>
- 
+
+</style>
 <body>
-<button onclick="startWorker()">Results</button>
-<h3>Results</h3>
-<div id="results" style="align:left;">
-</div>
-</body>
-</html>
-]]>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .ticks(10, "%");
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var data = {0:370, 1:288, 2:58, 3:453, 4:776, 5:289, 6:998, 7:1000, 8:1455, 9:300}
+
+d3.tsv("data/data.tsv", type, function(error, data) {
+  x.domain(data.map(function(d) { return d.letter; }));
+  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Frequency");
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.letter); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.frequency); })
+      .attr("height", function(d) { return height - y(d.frequency); });
+
+});
+
+function type(d) {
+  d.frequency = +d.frequency;
+  return d;
+}
+
+</script>
+
