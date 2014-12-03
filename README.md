@@ -38,9 +38,15 @@ Classifier is still being updated and changed to accommodate new ads, and to max
 Future Directions
 =================
 Attempt to use n-grams in classifier. 
+
 Two different types of trafficky ads are currently in classifier; this should be split up into two classifiers to see if more meaningful features list emerges. 
+
 Implement D3 visualization and live random ad function in data analysis UI. 
+
 Clean up data in database. 
+
 If, with changes, classifier is still overfitting data, try other classifiers (Logistic Regression and others).
+
 Attempt to make a classifier that uses presence / non-presence of phone numbers, names, locations, etc. to determine trafficking instead of words. COmpare performance of various classifiers. 
+
 Refactor by changing functions to classes to reduce redundant code. 
